@@ -1,0 +1,5 @@
+[03-Jan-2026 08:31:14 UTC] PHP Fatal error:  Uncaught Error: Call to a member function bind_param() on bool in /home3/canortxw/public_html/Bakkien/secure/dvmd/api/send_sos.php:39
+Stack trace:
+#0 {main}
+  thrown in /home3/canortxw/public_html/Bakkien/secure/dvmd/api/send_sos.php on line 39
+[03-Jan-2026 08:31:42 UTC] PHP Warning:  mysqli_stmt::bind_param(): Number of elements in type definition string doesn't match number of bind variables in /home3/canortxw/public_html/Bakkien/secure/dvmd/api/send_sos.php on line 40

@@ -1,0 +1,16 @@
+[07-Jan-2026 07:08:19 UTC] PHP Fatal error:  Uncaught Error: Interface 'PHPMailer\PHPMailer\OAuthTokenProvider' not found in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php:36
+Stack trace:
+#0 {main}
+  thrown in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php on line 36
+[11-Jan-2026 10:17:01 UTC] PHP Fatal error:  Uncaught Error: Interface 'PHPMailer\PHPMailer\OAuthTokenProvider' not found in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php:36
+Stack trace:
+#0 {main}
+  thrown in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php on line 36
+[11-Jan-2026 22:28:58 UTC] PHP Fatal error:  Uncaught Error: Interface 'PHPMailer\PHPMailer\OAuthTokenProvider' not found in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php:36
+Stack trace:
+#0 {main}
+  thrown in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php on line 36
+[12-Jan-2026 02:23:37 UTC] PHP Fatal error:  Uncaught Error: Interface 'PHPMailer\PHPMailer\OAuthTokenProvider' not found in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php:36
+Stack trace:
+#0 {main}
+  thrown in /home3/canortxw/public_html/Bakkien/secure/vendor/phpmailer/phpmailer/src/OAuth.php on line 36
