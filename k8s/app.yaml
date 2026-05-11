@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
         - name: web
-          image: dvmd-web:local
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/shiebin-bit/dvmd-emergency-module:latest
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 80
@@ -99,4 +99,3 @@ spec:
       port: 80
       targetPort: http
       nodePort: 30081
-

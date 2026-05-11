@@ -1,0 +1,186 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - separate-frontend-backend
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/shiebin-bit/dvmd-emergency-module
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+jobs:
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP lint
+        run: composer lint
+
+      - name: PHPUnit
+        run: composer test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            -t "$IMAGE_NAME:${{ github.sha }}" \
+            -t "$IMAGE_NAME:latest" \
+            .
+
+      - name: Set up Snyk
+        if: env.SNYK_TOKEN != ''
+        uses: snyk/actions/setup@master
+
+      - name: Snyk dependency scan
+        if: env.SNYK_TOKEN != ''
+        continue-on-error: true
+        run: snyk test --file=composer.json
+
+      - name: Snyk container scan
+        if: env.SNYK_TOKEN != ''
+        continue-on-error: true
+        run: snyk container test "$IMAGE_NAME:${{ github.sha }}"
+
+      - name: Snyk IaC scan
+        if: env.SNYK_TOKEN != ''
+        continue-on-error: true
+        run: snyk iac test k8s terraform
+
+      - name: Skip Snyk notice
+        if: env.SNYK_TOKEN == ''
+        run: echo "SNYK_TOKEN is not configured, so Snyk scans were skipped."
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Push Docker image to GHCR
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push "$IMAGE_NAME:${{ github.sha }}"
+          docker push "$IMAGE_NAME:latest"
+
+  deploy:
+    name: Deploy to Google Cloud k3s
+    runs-on: ubuntu-latest
+    needs: ci
+    if: github.event_name == 'workflow_dispatch'
+
+    env:
+      TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+      TF_VAR_region: asia-southeast1
+      TF_VAR_zone: asia-southeast1-a
+      TF_VAR_ssh_user: ubuntu
+      TF_VAR_ssh_public_key: ${{ secrets.GCE_SSH_PUBLIC_KEY }}
+      DEPLOY_IMAGE: ghcr.io/shiebin-bit/dvmd-emergency-module:${{ github.sha }}
+      GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform init
+        run: |
+          terraform -chdir=terraform init \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=dvmd/k3s"
+
+      - name: Terraform apply
+        run: terraform -chdir=terraform apply -auto-approve
+
+      - name: Read VM external IP
+        run: echo "GCE_IP=$(terraform -chdir=terraform output -raw instance_external_ip)" >> "$GITHUB_ENV"
+
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.GCE_SSH_PRIVATE_KEY }}" > ~/.ssh/dvmd_k3s
+          chmod 600 ~/.ssh/dvmd_k3s
+          for i in {1..30}; do
+            if ssh-keyscan -H "$GCE_IP" >> ~/.ssh/known_hosts 2>/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
+
+      - name: Wait for k3s
+        run: |
+          for i in {1..30}; do
+            if ssh -i ~/.ssh/dvmd_k3s "$TF_VAR_ssh_user@$GCE_IP" 'sudo k3s kubectl get nodes'; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
+
+      - name: Copy Kubernetes manifests
+        run: |
+          ssh -i ~/.ssh/dvmd_k3s "$TF_VAR_ssh_user@$GCE_IP" 'rm -rf /tmp/dvmd-k8s && mkdir -p /tmp/dvmd-k8s'
+          scp -i ~/.ssh/dvmd_k3s -r k8s/* "$TF_VAR_ssh_user@$GCE_IP:/tmp/dvmd-k8s/"
+
+      - name: Deploy application
+        run: |
+          ssh -i ~/.ssh/dvmd_k3s "$TF_VAR_ssh_user@$GCE_IP" \
+            "DEPLOY_IMAGE='$DEPLOY_IMAGE' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' bash -s" <<'EOF'
+          set -euo pipefail
+
+          sudo k3s kubectl apply -f /tmp/dvmd-k8s/namespace.yaml
+
+          if [ -n "${GHCR_READ_TOKEN:-}" ]; then
+            sudo k3s kubectl -n dvmd create secret docker-registry ghcr-pull-secret \
+              --docker-server=ghcr.io \
+              --docker-username=shiebin-bit \
+              --docker-password="$GHCR_READ_TOKEN" \
+              --docker-email=actions@github.com \
+              --dry-run=client -o yaml | sudo k3s kubectl apply -f -
+            sudo k3s kubectl -n dvmd patch serviceaccount default \
+              -p '{"imagePullSecrets":[{"name":"ghcr-pull-secret"}]}'
+          fi
+
+          sudo k3s kubectl apply -f /tmp/dvmd-k8s/configmap.yaml
+          sudo k3s kubectl apply -f /tmp/dvmd-k8s/mysql.yaml
+          sudo k3s kubectl apply -f /tmp/dvmd-k8s/app.yaml
+          sudo k3s kubectl -n dvmd set image deployment/dvmd-web web="$DEPLOY_IMAGE"
+          sudo k3s kubectl -n dvmd rollout status deployment/dvmd-mysql --timeout=240s
+          sudo k3s kubectl -n dvmd rollout status deployment/dvmd-web --timeout=240s
+          sudo k3s kubectl -n dvmd get pods
+          EOF
+
+      - name: Print deployment URL
+        run: echo "Deployment URL: http://$GCE_IP:30081/backend/loginpage.php"

@@ -134,6 +134,19 @@ Then open the same URL:
 http://localhost:30081/backend/loginpage.php
 ```
 
+For the cloud CI/CD flow, the deployment image is pulled from GHCR:
+
+```text
+ghcr.io/shiebin-bit/dvmd-emergency-module:<commit-sha>
+```
+
+For local Docker Desktop testing, override the image back to the local build if needed:
+
+```powershell
+kubectl -n dvmd set image deployment/dvmd-web web=dvmd-web:local
+kubectl -n dvmd rollout status deployment/dvmd-web
+```
+
 ### Kubernetes Database Settings
 
 Inside Kubernetes, the PHP app does not use `127.0.0.1:3307`. It connects through the MySQL service:
@@ -254,6 +267,89 @@ http://127.0.0.1:8001/backend/export_incidents.php
 - If `http://localhost:30081` does not load, run `kubectl port-forward -n dvmd svc/dvmd-web 30081:80` and keep that terminal open during the demo.
 - If the dashboard shows old data after changing `database/dvmd_db.sql`, reset the Docker volume with `docker compose down -v`.
 - If forgot/reset password email fails, check the `DVMD_SMTP_*` environment variables.
+
+## CI/CD Pipeline
+
+GitHub Actions is configured in `.github/workflows/ci-cd.yml`.
+
+CI runs on push and pull request:
+
+```text
+Composer install
+PHP lint
+PHPUnit smoke tests
+Docker build
+Snyk dependency/container/IaC scans when SNYK_TOKEN is configured
+Push Docker image to GHCR when not running on a pull request
+```
+
+The Docker image is published to:
+
+```text
+ghcr.io/shiebin-bit/dvmd-emergency-module
+```
+
+CD is manual. Use GitHub Actions `Run workflow` to deploy to Google Cloud k3s. The deploy job:
+
+```text
+Runs Terraform
+Creates/updates one Google Compute Engine VM
+Installs k3s on the VM
+Copies k8s manifests to the VM
+Applies the manifests with k3s kubectl
+Updates dvmd-web to the GHCR image for the current commit
+```
+
+Required GitHub repository variable:
+
+```text
+GCP_PROJECT_ID
+TF_STATE_BUCKET
+```
+
+`TF_STATE_BUCKET` is a Google Cloud Storage bucket used by Terraform remote state. Create it once before the first CD run.
+
+Required GitHub repository secrets:
+
+```text
+SNYK_TOKEN
+GCP_SA_KEY
+GCE_SSH_PRIVATE_KEY
+GCE_SSH_PUBLIC_KEY
+```
+
+Optional secret if the GHCR package is private:
+
+```text
+GHCR_READ_TOKEN
+```
+
+For the simplest demo, set the GHCR package visibility to public so the k3s VM can pull the image without `GHCR_READ_TOKEN`.
+
+## Terraform
+
+Terraform files are in `terraform/`. The configuration creates:
+
+```text
+1 Google Compute Engine VM
+Firewall rule for SSH 22
+Firewall rule for app NodePort 30081
+k3s installed through startup script
+```
+
+Default location:
+
+```text
+Region: asia-southeast1
+Zone: asia-southeast1-a
+Machine: e2-medium
+```
+
+After a successful manual CD run, open:
+
+```text
+http://<GCP_VM_EXTERNAL_IP>:30081/backend/loginpage.php
+```
 
 ## Notes
 
