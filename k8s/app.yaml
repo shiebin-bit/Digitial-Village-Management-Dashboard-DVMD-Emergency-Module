@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dvmd-web
+  namespace: dvmd
+  labels:
+    app: dvmd-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dvmd-web
+  template:
+    metadata:
+      labels:
+        app: dvmd-web
+    spec:
+      containers:
+        - name: web
+          image: dvmd-web:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          env:
+            - name: DVMD_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: dvmd-config
+                  key: DVMD_DB_HOST
+            - name: DVMD_DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: dvmd-config
+                  key: DVMD_DB_PORT
+            - name: DVMD_DB_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: dvmd-config
+                  key: DVMD_DB_USER
+            - name: DVMD_DB_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: dvmd-config
+                  key: DVMD_DB_PASSWORD
+            - name: DVMD_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: dvmd-config
+                  key: DVMD_DB_NAME
+            - name: DVMD_SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: dvmd-secrets
+                  key: DVMD_SMTP_USER
+                  optional: true
+            - name: DVMD_SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dvmd-secrets
+                  key: DVMD_SMTP_PASSWORD
+                  optional: true
+            - name: DVMD_SMTP_FROM_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: dvmd-secrets
+                  key: DVMD_SMTP_FROM_EMAIL
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /backend/loginpage.php
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /backend/loginpage.php
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dvmd-web
+  namespace: dvmd
+  labels:
+    app: dvmd-web
+spec:
+  type: NodePort
+  selector:
+    app: dvmd-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      nodePort: 30081
+

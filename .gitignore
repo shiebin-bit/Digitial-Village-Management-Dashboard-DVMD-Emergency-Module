@@ -1,0 +1,5 @@
+.env
+k8s/secret.yaml
+*.log
+**/error_log
+

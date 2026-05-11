@@ -24,6 +24,8 @@ This branch keeps the original UI and PHP flow, but arranges the files into clea
 |   `-- images/         Original static images
 |-- database/
 |   `-- dvmd_db.sql     Local database dump
+|-- k8s/                Docker Desktop Kubernetes manifests
+|-- Dockerfile          PHP Apache image for Kubernetes/demo deployment
 |-- docker-compose.yml  Local MySQL service
 |-- start-local.bat     Starts the PHP built-in server
 `-- .env.example        Example local environment variables
@@ -81,6 +83,92 @@ http://127.0.0.1:8001/backend/loginpage.php
 ```
 
 Do not open `frontend/login.html`. In this branch, `frontend/` contains CSS, JavaScript, and images only. The working pages are still PHP pages inside `backend/`.
+
+## Kubernetes Local Demo
+
+This project can run on Docker Desktop Kubernetes as one PHP web pod plus one MySQL pod.
+
+### 1. Build The Web Image
+
+```powershell
+docker build -t dvmd-web:local .
+```
+
+The image uses `php:8.2-apache`, enables `mysqli`, copies the current project into Apache, and redirects `/` to `/backend/loginpage.php`.
+
+For Docker Desktop Kubernetes, the local image tag `dvmd-web:local` can be used directly. For a cloud cluster, push the image to a registry first and update `k8s/app.yaml`.
+
+### 2. Apply Kubernetes Manifests
+
+Make sure Docker Desktop Kubernetes is enabled, then run:
+
+```powershell
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/mysql.yaml
+kubectl apply -f k8s/app.yaml
+```
+
+Check the deployment:
+
+```powershell
+kubectl get pods -n dvmd
+kubectl get svc -n dvmd
+```
+
+Open:
+
+```text
+http://localhost:30081/backend/loginpage.php
+```
+
+If Docker Desktop kind does not expose the NodePort directly, start a port-forward in another PowerShell window:
+
+```powershell
+kubectl port-forward -n dvmd svc/dvmd-web 30081:80
+```
+
+Then open the same URL:
+
+```text
+http://localhost:30081/backend/loginpage.php
+```
+
+### Kubernetes Database Settings
+
+Inside Kubernetes, the PHP app does not use `127.0.0.1:3307`. It connects through the MySQL service:
+
+```text
+DVMD_DB_HOST=dvmd-mysql
+DVMD_DB_PORT=3306
+DVMD_DB_USER=root
+DVMD_DB_PASSWORD=
+DVMD_DB_NAME=dvmd_db
+```
+
+The SQL seed is stored in `k8s/configmap.yaml` from `database/dvmd_db.sql` and is mounted into the MySQL container at `/docker-entrypoint-initdb.d/01-dvmd.sql`.
+
+If you change the SQL seed after MySQL has already started, reset the Kubernetes database PVC:
+
+```powershell
+kubectl delete -f k8s/mysql.yaml
+kubectl delete pvc dvmd-mysql-pvc -n dvmd
+kubectl apply -f k8s/mysql.yaml
+```
+
+Only delete the PVC when you are okay losing the local Kubernetes MySQL data.
+
+### Optional Secrets
+
+`k8s/secret.yaml.example` contains placeholders for SMTP and New Relic values. Do not commit real secrets.
+
+To use it locally:
+
+```powershell
+Copy-Item k8s/secret.yaml.example k8s/secret.yaml
+notepad k8s/secret.yaml
+kubectl apply -f k8s/secret.yaml
+```
 
 ## Test Accounts
 
@@ -162,6 +250,8 @@ http://127.0.0.1:8001/backend/export_incidents.php
 
 - If login works but reports/weather do not show, confirm PHP is running from the repository root with `-t .`.
 - If database connection fails, confirm Docker MySQL is running and port `3307` is not used by another MySQL service.
+- If Kubernetes login page cannot connect to MySQL, confirm the `dvmd-mysql` pod is `Running` and `k8s/configmap.yaml` has `DVMD_DB_HOST=dvmd-mysql`.
+- If `http://localhost:30081` does not load, run `kubectl port-forward -n dvmd svc/dvmd-web 30081:80` and keep that terminal open during the demo.
 - If the dashboard shows old data after changing `database/dvmd_db.sql`, reset the Docker volume with `docker compose down -v`.
 - If forgot/reset password email fails, check the `DVMD_SMTP_*` environment variables.
 
