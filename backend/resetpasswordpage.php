@@ -1,6 +1,6 @@
 <?php
 session_start();
-include('includes/dbconnect.php');
+include(__DIR__ . '/includes/dbconnect.php');
 
 if (!isset($_SESSION['reset_email'])) {
     header("Location: forgotpasswordpage.php");
@@ -53,10 +53,10 @@ if (isset($_POST['reset_password'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reset Password | Digital Village Dashboard</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="icon" type="image/png" href="../frontend/images/icon.png">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../frontend/css/style.css" rel="stylesheet" type="text/css" />
     <style>
         body::before {
             content: "";
@@ -65,7 +65,7 @@ if (isset($_POST['reset_password'])) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('images/background.png') no-repeat center center fixed;
+            background: url('../frontend/images/background.png') no-repeat center center fixed;
             background-size: cover;
             filter: brightness(0.5);
             z-index: -1;
@@ -97,3 +97,4 @@ if (isset($_POST['reset_password'])) {
 </body>
 
 </html>
+

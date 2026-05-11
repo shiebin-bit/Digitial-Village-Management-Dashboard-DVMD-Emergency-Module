@@ -1,0 +1,16 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: dvmd-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: dvmd_db
+    ports:
+      - "3307:3306"
+    volumes:
+      - dvmd-mysql-data:/var/lib/mysql
+      - ./database/dvmd_db.sql:/docker-entrypoint-initdb.d/01-dvmd.sql:ro
+
+volumes:
+  dvmd-mysql-data:

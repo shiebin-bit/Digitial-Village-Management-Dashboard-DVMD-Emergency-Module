@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
 include(__DIR__ . '/dbconnect.php');
 
 // 1. Check login

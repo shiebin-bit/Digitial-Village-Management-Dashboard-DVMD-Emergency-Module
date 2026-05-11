@@ -1,7 +1,7 @@
 <?php
 session_start();
-include('includes/dbconnect.php');
-include('includes/auth_user.php');
+include(__DIR__ . '/includes/dbconnect.php');
+include(__DIR__ . '/includes/auth_user.php');
 
 $user_role = (int)$_SESSION['role']; // Creator role
 $user_area_id = (int)$_SESSION['area_id']; // Creator area id
@@ -360,9 +360,9 @@ function getCoordinates($villageName)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register | Digital Village Dashboard</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="icon" type="image/png" href="../frontend/images/icon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../frontend/css/style.css" rel="stylesheet" type="text/css" />
     <style>
         body::before {
             content: "";
@@ -371,7 +371,7 @@ function getCoordinates($villageName)
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('images/background.png') no-repeat center center fixed;
+            background: url('../frontend/images/background.png') no-repeat center center fixed;
             background-size: cover;
             filter: brightness(0.5);
             z-index: -1;
@@ -548,7 +548,7 @@ function getCoordinates($villageName)
         </form>
     </div>
 
-    <?php include_once('includes/footer.php'); ?>
+    <?php include_once(__DIR__ . '/includes/footer.php'); ?>
 
     <script>
         const roleSelect = document.getElementById('roleSelect');
@@ -576,3 +576,4 @@ function getCoordinates($villageName)
 </body>
 
 </html>
+

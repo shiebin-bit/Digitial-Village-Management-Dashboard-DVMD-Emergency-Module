@@ -1,7 +1,7 @@
 <?php
 session_start();
-include('includes/dbconnect.php');
-require 'vendor/autoload.php';
+include(__DIR__ . '/includes/dbconnect.php');
+require __DIR__ . '/vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 
@@ -62,12 +62,12 @@ if (isset($_POST['resend_otp'])) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'jackshentan0831@gmail.com';
-        $mail->Password = 'rjgixoakxeimohqy';
+        $mail->Username = getenv('DVMD_SMTP_USER') ?: '';
+        $mail->Password = getenv('DVMD_SMTP_PASSWORD') ?: '';
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
-        $mail->setFrom('jackshentan0831@gmail.com', 'DVDM | Digital Village Dashboard Management');
+        $mail->setFrom(getenv('DVMD_SMTP_FROM_EMAIL') ?: $mail->Username, 'DVDM | Digital Village Dashboard Management');
         $mail->addAddress($email);
 
         $mail->Subject = 'Your OTP Code';
@@ -85,10 +85,10 @@ if (isset($_POST['resend_otp'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTP Verification | Digital Village Dashboard</title>
-    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="icon" type="image/png" href="../frontend/images/icon.png">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../frontend/css/style.css" rel="stylesheet" type="text/css" />
     <style>
         body::before {
             content: "";
@@ -97,7 +97,7 @@ if (isset($_POST['resend_otp'])) {
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('images/background.png') no-repeat center center fixed;
+            background: url('../frontend/images/background.png') no-repeat center center fixed;
             background-size: cover;
             filter: brightness(0.5);
             z-index: -1;
@@ -160,3 +160,5 @@ if (isset($_POST['resend_otp'])) {
 </body>
 
 </html>
+
+

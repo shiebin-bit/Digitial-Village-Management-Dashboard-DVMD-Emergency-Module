@@ -1,6 +1,6 @@
 <?php
-require_once('includes/dbconnect.php');
-require_once('includes/auth_user.php');
+require_once(__DIR__ . '/includes/dbconnect.php');
+require_once(__DIR__ . '/includes/auth_user.php');
 
 $areaType = $_GET['area_type'] ?? '0';
 $areaId   = intval($_GET['area_id'] ?? 0);
@@ -41,3 +41,5 @@ if (isset($data['current_weather'])) {
 } else {
     echo json_encode(["temp"=>"--","code"=>"-1"]);
 }
+
+
