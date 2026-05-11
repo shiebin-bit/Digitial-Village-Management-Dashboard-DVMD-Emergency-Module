@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - separate-frontend-backend
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/shiebin-bit/dvmd-emergency-module
+  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+jobs:
+  ci:
+    name: Test, Scan, Build, Push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mysqli
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHP lint
+        run: composer lint
+
+      - name: PHPUnit
+        run: composer test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            -t "$IMAGE_NAME:${{ github.sha }}" \
+            -t "$IMAGE_NAME:latest" \
+            .
+
+      - name: Set up Snyk
+        if: env.SNYK_TOKEN != ''
+        uses: snyk/actions/setup@master
+
+      - name: Snyk dependency scan
+        if: env.SNYK_TOKEN != ''
+        continue-on-error: true
+        run: snyk test --file=composer.json
+
+      - name: Snyk container scan
+        if: env.SNYK_TOKEN != ''
+        continue-on-error: true
+        run: snyk container test "$IMAGE_NAME:${{ github.sha }}"
+
+      - name: Snyk IaC scan
+        if: env.SNYK_TOKEN != ''
+        continue-on-error: true
+        run: snyk iac test k8s terraform
+
+      - name: Skip Snyk notice
+        if: env.SNYK_TOKEN == ''
+        run: echo "SNYK_TOKEN is not configured, so Snyk scans were skipped."
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Push Docker image to GHCR
+        if: github.event_name != 'pull_request'
+        run: |
+          docker push "$IMAGE_NAME:${{ github.sha }}"
+          docker push "$IMAGE_NAME:latest"
+

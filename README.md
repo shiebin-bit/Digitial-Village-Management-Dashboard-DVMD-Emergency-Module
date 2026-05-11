@@ -270,7 +270,12 @@ http://127.0.0.1:8001/backend/export_incidents.php
 
 ## CI/CD Pipeline
 
-GitHub Actions is configured in `.github/workflows/ci-cd.yml`.
+GitHub Actions is split into two workflows:
+
+```text
+.github/workflows/ci.yml  automatic CI
+.github/workflows/cd.yml  manual CD
+```
 
 CI runs on push and pull request:
 
@@ -289,7 +294,7 @@ The Docker image is published to:
 ghcr.io/shiebin-bit/dvmd-emergency-module
 ```
 
-CD is manual. Use GitHub Actions `Run workflow` to deploy to Google Cloud k3s. The deploy job:
+CD is manual. In GitHub Actions, open the `CD` workflow and click `Run workflow`. The deploy job:
 
 ```text
 Runs Terraform
@@ -300,16 +305,25 @@ Applies the manifests with k3s kubectl
 Updates dvmd-web to the GHCR image for the current commit
 ```
 
-Required GitHub repository variable:
+When manually running CD, `image_tag` is optional. Leave it empty to deploy the current workflow commit SHA, or enter a GHCR tag such as `latest`.
+
+### GitHub Variables
+
+Add these under GitHub `Settings > Secrets and variables > Actions > Variables`:
 
 ```text
 GCP_PROJECT_ID
 TF_STATE_BUCKET
 ```
 
-`TF_STATE_BUCKET` is a Google Cloud Storage bucket used by Terraform remote state. Create it once before the first CD run.
+| Variable | Example | Used by | Purpose |
+| --- | --- | --- | --- |
+| `GCP_PROJECT_ID` | `my-gcp-project-id` | CD | Google Cloud project where Terraform creates the k3s VM. |
+| `TF_STATE_BUCKET` | `my-dvmd-terraform-state` | CD | GCS bucket used by Terraform remote state. Create it once before the first CD run. |
 
-Required GitHub repository secrets:
+### GitHub Secrets
+
+Add these under GitHub `Settings > Secrets and variables > Actions > Secrets`:
 
 ```text
 SNYK_TOKEN
@@ -317,6 +331,18 @@ GCP_SA_KEY
 GCE_SSH_PRIVATE_KEY
 GCE_SSH_PUBLIC_KEY
 ```
+
+| Secret | Required | Used by | Purpose |
+| --- | --- | --- | --- |
+| `SNYK_TOKEN` | Recommended | CI | Runs Snyk dependency, container, and IaC scans. If missing, CI skips Snyk. |
+| `GCP_SA_KEY` | Yes for CD | CD | Google service account JSON for Terraform. |
+| `GCE_SSH_PRIVATE_KEY` | Yes for CD | CD | Private SSH key used by GitHub Actions to connect to the k3s VM. |
+| `GCE_SSH_PUBLIC_KEY` | Yes for CD | CD/Terraform | Public SSH key injected into the GCE VM metadata. |
+| `GHCR_READ_TOKEN` | Only if GHCR image is private | CD/k3s | GitHub PAT with `read:packages` so k3s can pull a private GHCR image. |
+
+For `GCP_SA_KEY`, create a Google Cloud service account with enough permission to manage Compute Engine, firewall rules, and the Terraform state bucket, then paste the full JSON key as the secret value.
+
+For the SSH keys, generate a pair and put the public key in `GCE_SSH_PUBLIC_KEY`, private key in `GCE_SSH_PRIVATE_KEY`.
 
 Optional secret if the GHCR package is private:
 

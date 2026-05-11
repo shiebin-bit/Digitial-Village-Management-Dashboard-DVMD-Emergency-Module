@@ -1,108 +1,41 @@
-name: CI/CD
+name: CD
 
 on:
-  push:
-    branches:
-      - main
-      - separate-frontend-backend
-  pull_request:
   workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "GHCR image tag to deploy. Defaults to the workflow commit SHA."
+        required: false
+        type: string
 
 permissions:
   contents: read
-  packages: write
 
 env:
   IMAGE_NAME: ghcr.io/shiebin-bit/dvmd-emergency-module
-  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+  TF_VAR_region: asia-southeast1
+  TF_VAR_zone: asia-southeast1-a
+  TF_VAR_ssh_user: ubuntu
+  TF_VAR_ssh_public_key: ${{ secrets.GCE_SSH_PUBLIC_KEY }}
+  GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
 
 jobs:
-  ci:
-    name: CI
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          extensions: mysqli
-          coverage: none
-
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
-
-      - name: PHP lint
-        run: composer lint
-
-      - name: PHPUnit
-        run: composer test
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image
-        run: |
-          docker build \
-            --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
-            -t "$IMAGE_NAME:${{ github.sha }}" \
-            -t "$IMAGE_NAME:latest" \
-            .
-
-      - name: Set up Snyk
-        if: env.SNYK_TOKEN != ''
-        uses: snyk/actions/setup@master
-
-      - name: Snyk dependency scan
-        if: env.SNYK_TOKEN != ''
-        continue-on-error: true
-        run: snyk test --file=composer.json
-
-      - name: Snyk container scan
-        if: env.SNYK_TOKEN != ''
-        continue-on-error: true
-        run: snyk container test "$IMAGE_NAME:${{ github.sha }}"
-
-      - name: Snyk IaC scan
-        if: env.SNYK_TOKEN != ''
-        continue-on-error: true
-        run: snyk iac test k8s terraform
-
-      - name: Skip Snyk notice
-        if: env.SNYK_TOKEN == ''
-        run: echo "SNYK_TOKEN is not configured, so Snyk scans were skipped."
-
-      - name: Log in to GHCR
-        if: github.event_name != 'pull_request'
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-      - name: Push Docker image to GHCR
-        if: github.event_name != 'pull_request'
-        run: |
-          docker push "$IMAGE_NAME:${{ github.sha }}"
-          docker push "$IMAGE_NAME:latest"
-
   deploy:
     name: Deploy to Google Cloud k3s
     runs-on: ubuntu-latest
-    needs: ci
-    if: github.event_name == 'workflow_dispatch'
-
-    env:
-      TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
-      TF_VAR_region: asia-southeast1
-      TF_VAR_zone: asia-southeast1-a
-      TF_VAR_ssh_user: ubuntu
-      TF_VAR_ssh_public_key: ${{ secrets.GCE_SSH_PUBLIC_KEY }}
-      DEPLOY_IMAGE: ghcr.io/shiebin-bit/dvmd-emergency-module:${{ github.sha }}
-      GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve image tag
+        run: |
+          if [ -n "${{ inputs.image_tag }}" ]; then
+            echo "DEPLOY_IMAGE=$IMAGE_NAME:${{ inputs.image_tag }}" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_IMAGE=$IMAGE_NAME:${{ github.sha }}" >> "$GITHUB_ENV"
+          fi
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -124,7 +57,8 @@ jobs:
         run: terraform -chdir=terraform apply -auto-approve
 
       - name: Read VM external IP
-        run: echo "GCE_IP=$(terraform -chdir=terraform output -raw instance_external_ip)" >> "$GITHUB_ENV"
+        run: |
+          echo "GCE_IP=$(terraform -chdir=terraform output -raw instance_external_ip)" >> "$GITHUB_ENV"
 
       - name: Configure SSH key
         run: |
@@ -183,4 +117,6 @@ jobs:
           EOF
 
       - name: Print deployment URL
-        run: echo "Deployment URL: http://$GCE_IP:30081/backend/loginpage.php"
+        run: |
+          echo "Deployment URL: http://$GCE_IP:30081/backend/loginpage.php"
+
