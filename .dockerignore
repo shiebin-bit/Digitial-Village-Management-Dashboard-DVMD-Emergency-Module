@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+.github
+/vendor/
+/tests/
+/scripts/
+/terraform/
+/composer.json
+/composer.lock
+/phpunit.xml
+k8s/secret.yaml
+*.log
+**/error_log

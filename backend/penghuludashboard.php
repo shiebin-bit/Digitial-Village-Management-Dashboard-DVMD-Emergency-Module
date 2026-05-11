@@ -1,6 +1,6 @@
 <?php
-require_once('includes/auth_user.php');
-require_once('includes/dbconnect.php');
+require_once(__DIR__ . '/includes/auth_user.php');
+require_once(__DIR__ . '/includes/dbconnect.php');
 date_default_timezone_set('Asia/Kuala_Lumpur');
 
 // --- SECURITY: ACCESS CONTROL ---
@@ -174,14 +174,14 @@ function isActive($target) { global $page; return $page === $target ? 'active' :
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="icon" type="image/png" href="../frontend/images/icon.png">
     <title>Penghulu Dashboard | Secure DVDM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link href="css/penghuludashboard.css" rel="stylesheet" type="text/css" />
-    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../frontend/css/penghuludashboard.css" rel="stylesheet" type="text/css" />
+    <link href="../frontend/css/style.css" rel="stylesheet" type="text/css" />
     <style>
         #map { height: 500px; width: 100%; border-radius: 12px; border: 1px solid #ddd; }
         .announcement-form-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
@@ -250,7 +250,7 @@ function isActive($target) { global $page; return $page === $target ? 'active' :
     <button class="menu-toggle" id="menuToggle"><i class="fa-solid fa-bars"></i></button>
 
     <div class="sidebar">
-        <div class="logo"><img src="images/icon.png" style="scale: 0.75;" alt="Logo" class="logo-img"><p>DVDM</p></div>
+        <div class="logo"><img src="../frontend/images/icon.png" style="scale: 0.75;" alt="Logo" class="logo-img"><p>DVDM</p></div>
         <div class="user-info-box">
             <div class="avatar">
                 <a class="avatar-upload" title="Upload Avatar">
@@ -358,7 +358,7 @@ function isActive($target) { global $page; return $page === $target ? 'active' :
                     </div>
                 <?php endwhile; endif; ?>
             </div>
-            <script src="js/weather.js"></script>
+            <script src="../frontend/js/weather.js"></script>
 
         <?php elseif ($page === 'announcement'): ?>
             <div class="page-header"><h1>Make Announcement</h1></p></div>
@@ -392,7 +392,7 @@ function isActive($target) { global $page; return $page === $target ? 'active' :
         <?php elseif ($page === 'map'): ?>
             <h1>Report Map</h1>
             <div id="map" style="height:500px; width:100%; border-radius:10px;"></div>
-            <script src="js/reports.js"></script>
+            <script src="../frontend/js/reports.js"></script>
 
         <?php elseif ($page === 'incident'): ?>
             <div class="page-header"><div><h1>Incidents</h1><p>Active reports </p></div>
@@ -636,7 +636,8 @@ function isActive($target) { global $page; return $page === $target ? 'active' :
         <?php endif; ?>
     </main>
 
-    <?php include_once('includes/footer.php'); ?>
-    <script src="js/sidebar.js"></script>
+    <?php include_once(__DIR__ . '/includes/footer.php'); ?>
+    <script src="../frontend/js/sidebar.js"></script>
 </body>
 </html>
+

@@ -1,6 +1,6 @@
 <?php
-require_once('includes/auth_user.php');
-require_once('includes/dbconnect.php');
+require_once(__DIR__ . '/includes/auth_user.php');
+require_once(__DIR__ . '/includes/dbconnect.php');
 date_default_timezone_set('Asia/Kuala_Lumpur');
 
 $page = $_GET['page'] ?? 'overview';
@@ -125,11 +125,11 @@ if (isset($_POST['submit_household'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="icon" type="image/png" href="../frontend/images/icon.png">
     <title>Ketua Kampung Dashboard | Digital Village Dashboard Management</title>
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../frontend/css/style.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -201,7 +201,7 @@ if (isset($_POST['submit_household'])) {
     <!--  Left Sidebar -->
     <div class="sidebar">
         <div class="logo">
-            <img src="images/icon.png" style="scale: 0.75;" alt="Logo" class="logo-img">
+            <img src="../frontend/images/icon.png" style="scale: 0.75;" alt="Logo" class="logo-img">
             <p>DVMD</p>
         </div>
         <div class="user-info-box">
@@ -234,7 +234,7 @@ if (isset($_POST['submit_household'])) {
                 data-area-type="<?= $_SESSION['role'] ?>"
                 data-area-id="<?= $_SESSION['area_id'] ?>">
             </div>
-            <script type="text/javascript" src="js/weather.js"></script>
+            <script type="text/javascript" src="../frontend/js/weather.js"></script>
             <div class="dashboard-header"><h1>Ketua Kampung Overview</h1><p class="subtitle">Live population and weather data for your village.</p></div>
             <section class="section">
                 <?php
@@ -640,7 +640,7 @@ if (isset($_POST['submit_household'])) {
         <?php if ($page == 'map'): ?>
             <div class="page-header"><h1>Village Map</h1><p>Visual overview of <?= htmlspecialchars($village_name) ?></p></div>
             <div id="map" style="height:500px; width:100%; border-radius:10px;"></div>
-            <script src="js/reports.js"></script>
+            <script src="../frontend/js/reports.js"></script>
         <?php endif ?>
 
         <?php if ($page == 'history'): ?>
@@ -1014,8 +1014,8 @@ if (isset($_POST['submit_household'])) {
             </form>
         <?php endif ?>
     </div>
-    <?php include_once('includes/footer.php'); ?>
-    <script type="text/javascript" src="js/sidebar.js"></script>
+    <?php include_once(__DIR__ . '/includes/footer.php'); ?>
+    <script type="text/javascript" src="../frontend/js/sidebar.js"></script>
     <script>
         const tabs = document.querySelectorAll('.tab-btn');
         const lists = document.querySelectorAll('.report-list');
@@ -1034,3 +1034,4 @@ if (isset($_POST['submit_household'])) {
 </body>
 
 </html>
+

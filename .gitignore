@@ -1,0 +1,11 @@
+.env
+k8s/secret.yaml
+*.log
+**/error_log
+/vendor/
+/.phpunit.cache/
+/coverage/
+terraform.tfstate
+terraform.tfstate.*
+*.tfvars
+*.tfvars.json

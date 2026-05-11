@@ -1,186 +1,384 @@
 # DVMD Emergency Management System
 
-DVMD is a PHP and MySQL emergency management platform for Malaysian local administration. It provides role-based dashboards for `Ketua Kampung`, `Penghulu`, and `Pejabat Daerah`, plus a small set of JSON APIs used by the village-side client to submit incident and SOS reports.
+Digital Village Management Dashboard emergency module with PHP dashboards, MySQL data storage, and the original static CSS/JS/image assets.
 
-## Overview
-
-This repository contains two main parts:
-
-- A browser-based management dashboard for local authority users
-- A PHP API layer under `dvmd/api/` for villager/mobile-side reporting flows
-
-The system is organised around Malaysia's administrative hierarchy:
-
-- `Ketua Kampung` manages village-level data
-- `Penghulu` manages subdistrict-level data
-- `Pejabat Daerah` manages district-level data
-
-## Main Features
-
-- Role-based login and dashboard routing
-- Account registration flow managed by authenticated staff users
-- Incident submission, tracking, and status updates
-- SOS submission flow for urgent alerts
-- Village announcements
-- Weather widget powered by Open-Meteo
-- Password reset with OTP email delivery through PHPMailer
-- CSV/report export endpoints
-
-## User Roles
-
-| Role value | Role | Main entry page |
-| --- | --- | --- |
-| `0` | Ketua Kampung | `ketuakampungdashboard.php` |
-| `1` | Penghulu | `penghuludashboard.php` |
-| `2` | Pejabat Daerah | `pejabatdaerahdashboard.php` |
-
-Registration permissions in the current code:
-
-- `Penghulu` can create `Ketua Kampung` accounts
-- `Pejabat Daerah` can create `Ketua Kampung`, `Penghulu`, and `Pejabat Daerah` accounts
+This branch keeps the original UI and PHP flow, but arranges the files into clearer `frontend/` and `backend/` folders for local development. It does not convert the dashboard into React/Vue and it does not move the login/dashboard pages to static HTML yet.
 
 ## Project Structure
 
 ```text
 .
-|-- css/                     Frontend styles
+|-- backend/
+|   |-- includes/       Database connection, auth guard, shared footer
+|   |-- management/     Incident and SOS update/delete handlers
+|   |-- dvmd/           Existing mobile/villager APIs and uploaded images
+|   |-- vendor/         PHPMailer dependencies
+|   |-- loginpage.php
+|   |-- registerpage.php
+|   |-- ketuakampungdashboard.php
+|   |-- penghuludashboard.php
+|   `-- pejabatdaerahdashboard.php
+|-- frontend/
+|   |-- css/            Original CSS files
+|   |-- js/             Original JavaScript files
+|   `-- images/         Original static images
 |-- database/
-|   `-- dvmd_db.sql          Database schema and sample data
-|-- dvmd/
-|   |-- api/                 JSON endpoints for villager/mobile workflows
-|   `-- assets/              Uploaded image assets
-|-- images/                  Static images and icons
-|-- includes/
-|   |-- auth_user.php        Session/role validation
-|   |-- dbconnect.php        MySQL connection
-|   `-- footer.php           Shared footer include
-|-- js/
-|   `-- weather.js           Weather widget client logic
-|-- management/
-|   |-- incident/            Incident update/delete handlers
-|   `-- sos/                 SOS update/delete handlers
-|-- vendor/                  Bundled PHPMailer dependency
-|-- loginpage.php            Main web login entry
-|-- registerpage.php         Role-based account creation
-|-- forgotpasswordpage.php   OTP request page
-|-- verifyOTPpage.php        OTP verification page
-|-- resetpasswordpage.php    Password reset page
-|-- weather_api.php          Weather proxy endpoint
-|-- get_reports.php          Combined report feed for dashboards
-`-- export_incidents.php     CSV export endpoint
+|   `-- dvmd_db.sql     Local database dump
+|-- k8s/                Docker Desktop Kubernetes manifests
+|-- Dockerfile          PHP Apache image for Kubernetes/demo deployment
+|-- docker-compose.yml  Local MySQL service
+|-- start-local.bat     Starts the PHP built-in server
+`-- .env.example        Example local environment variables
 ```
 
-## Tech Stack
+## Local Setup
 
-- PHP 8.x style application code
-- MySQL or MariaDB
-- Apache or another PHP-capable web server
-- PHPMailer for OTP email delivery
-- Open-Meteo for live weather data
-- HTML, CSS, and JavaScript for the dashboard UI
+### 1. Start MySQL With Docker
 
-## Requirements
+```powershell
+docker compose up -d mysql
+```
 
-- PHP 8.0 or above
-- MySQL or MariaDB
-- Apache/Nginx with PHP enabled
-- Internet access for:
-  - Open-Meteo weather requests
-  - SMTP email delivery if password reset is used
+Local database settings:
 
-## Installation
+```text
+Host: 127.0.0.1
+Port: 3307
+Database: dvmd_db
+User: root
+Password: empty
+```
 
-1. Copy the project into your web root.
-   Example for XAMPP:
-   `E:\xampp\htdocs\Digitial-Village-Management-Dashboard-DVMD-Emergency-Module-main`
-2. Create a database in MySQL or MariaDB.
-3. Import `database/dvmd_db.sql`.
-4. Update the database connection in `includes/dbconnect.php`.
-5. Review SMTP settings in `forgotpasswordpage.php` and `verifyOTPpage.php`.
-6. Ensure PHP can write uploaded images into `dvmd/assets/`.
-7. Open `loginpage.php` in the browser to access the web dashboard.
+The SQL dump in `database/dvmd_db.sql` is imported automatically when the Docker MySQL volume is created for the first time.
 
-## Configuration Checklist
+If the database was already created before the latest dump update, reset the local Docker database with:
 
-Before using this project outside the original environment, update these items:
+```powershell
+docker compose down -v
+docker compose up -d mysql
+```
 
-- Database host, username, password, and database name in `includes/dbconnect.php`
-- SMTP server settings and sender credentials in:
-  - `forgotpasswordpage.php`
-  - `verifyOTPpage.php`
-- File/folder permissions for uploaded incident and SOS images
-- CORS policy in `dvmd/api/` if the API will not be public
+Only run the reset command when you are okay deleting the local Docker MySQL data.
 
-## Web Entry Points
+### 2. Start PHP
 
-| Path | Purpose |
+Use the included script:
+
+```powershell
+.\start-local.bat
+```
+
+Or run PHP manually:
+
+```powershell
+E:\xampp\php\php.exe -S 127.0.0.1:8001 -t .
+```
+
+### 3. Open The App
+
+Use this URL:
+
+```text
+http://127.0.0.1:8001/backend/loginpage.php
+```
+
+Do not open `frontend/login.html`. In this branch, `frontend/` contains CSS, JavaScript, and images only. The working pages are still PHP pages inside `backend/`.
+
+## Kubernetes Local Demo
+
+This project can run on Docker Desktop Kubernetes as one PHP web pod plus one MySQL pod.
+
+### 1. Build The Web Image
+
+```powershell
+docker build -t dvmd-web:local .
+```
+
+The image uses `php:8.2-apache`, enables `mysqli`, copies the current project into Apache, and redirects `/` to `/backend/loginpage.php`.
+
+For Docker Desktop Kubernetes, the local image tag `dvmd-web:local` can be used directly. For a cloud cluster, push the image to a registry first and update `k8s/app.yaml`.
+
+### 2. Apply Kubernetes Manifests
+
+Make sure Docker Desktop Kubernetes is enabled, then run:
+
+```powershell
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/mysql.yaml
+kubectl apply -f k8s/app.yaml
+```
+
+Check the deployment:
+
+```powershell
+kubectl get pods -n dvmd
+kubectl get svc -n dvmd
+```
+
+Open:
+
+```text
+http://localhost:30081/backend/loginpage.php
+```
+
+If Docker Desktop kind does not expose the NodePort directly, start a port-forward in another PowerShell window:
+
+```powershell
+kubectl port-forward -n dvmd svc/dvmd-web 30081:80
+```
+
+Then open the same URL:
+
+```text
+http://localhost:30081/backend/loginpage.php
+```
+
+For the cloud CI/CD flow, the deployment image is pulled from GHCR:
+
+```text
+ghcr.io/shiebin-bit/dvmd-emergency-module:<commit-sha>
+```
+
+For local Docker Desktop testing, override the image back to the local build if needed:
+
+```powershell
+kubectl -n dvmd set image deployment/dvmd-web web=dvmd-web:local
+kubectl -n dvmd rollout status deployment/dvmd-web
+```
+
+### Kubernetes Database Settings
+
+Inside Kubernetes, the PHP app does not use `127.0.0.1:3307`. It connects through the MySQL service:
+
+```text
+DVMD_DB_HOST=dvmd-mysql
+DVMD_DB_PORT=3306
+DVMD_DB_USER=root
+DVMD_DB_PASSWORD=
+DVMD_DB_NAME=dvmd_db
+```
+
+The SQL seed is stored in `k8s/configmap.yaml` from `database/dvmd_db.sql` and is mounted into the MySQL container at `/docker-entrypoint-initdb.d/01-dvmd.sql`.
+
+If you change the SQL seed after MySQL has already started, reset the Kubernetes database PVC:
+
+```powershell
+kubectl delete -f k8s/mysql.yaml
+kubectl delete pvc dvmd-mysql-pvc -n dvmd
+kubectl apply -f k8s/mysql.yaml
+```
+
+Only delete the PVC when you are okay losing the local Kubernetes MySQL data.
+
+### Optional Secrets
+
+`k8s/secret.yaml.example` contains placeholders for SMTP and New Relic values. Do not commit real secrets.
+
+To use it locally:
+
+```powershell
+Copy-Item k8s/secret.yaml.example k8s/secret.yaml
+notepad k8s/secret.yaml
+kubectl apply -f k8s/secret.yaml
+```
+
+## Test Accounts
+
+All dashboard test users use this password:
+
+```text
+Password@123
+```
+
+| Role | Email |
 | --- | --- |
-| `loginpage.php` | Staff login page |
-| `registerpage.php` | Account creation for permitted roles |
-| `forgotpasswordpage.php` | Start password reset flow |
-| `verifyOTPpage.php` | Verify OTP code |
-| `resetpasswordpage.php` | Set a new password |
-| `ketuakampungdashboard.php` | Village-level dashboard |
-| `penghuludashboard.php` | Subdistrict-level dashboard |
-| `pejabatdaerahdashboard.php` | District-level dashboard |
+| Ketua Kampung | `eric@gmail.com` |
+| Ketua Kampung | `wei@gmail.com` |
+| Ketua Kampung | `zhou@gmail.com` |
+| Penghulu | `lim@gmail.com` |
+| Penghulu | `foo@gmail.com` |
+| Pejabat Daerah | `yeekientanpro@gmail.com` |
+| Pejabat Daerah | `wee@gmail.com` |
 
-## API Endpoints
+Role redirects after login:
 
-These endpoints are currently present under `dvmd/api/`.
+| Role ID | Dashboard |
+| --- | --- |
+| `0` | `backend/ketuakampungdashboard.php` |
+| `1` | `backend/penghuludashboard.php` |
+| `2` | `backend/pejabatdaerahdashboard.php` |
 
-| Endpoint | Method | Purpose |
-| --- | --- | --- |
-| `dvmd/api/login_villager.php` | `POST` | Villager/mobile login |
-| `dvmd/api/report_incident.php` | `POST` | Submit a new incident report |
-| `dvmd/api/send_sos.php` | `POST` | Submit an SOS alert |
-| `dvmd/api/get_my_reports.php` | `POST` | Fetch a villager's submitted reports |
-| `dvmd/api/get_announcements.php` | `POST` | Fetch the latest village announcements |
-| `dvmd/api/get_ketua_phone.php` | `GET` | Fetch Ketua Kampung contact number by `village_id` |
+## Configuration
 
-Other supporting endpoints outside `dvmd/api/`:
+Database connection defaults are stored in `backend/includes/dbconnect.php` and are set for local Docker MySQL.
 
-| Endpoint | Method | Purpose |
-| --- | --- | --- |
-| `weather_api.php` | `GET` | Returns current weather for a selected area |
-| `get_reports.php` | Session-based | Returns combined incident/SOS feed for logged-in dashboard users |
-| `export_incidents.php` | Session-based | Streams incident data as CSV |
+They can be overridden with environment variables:
 
-## Database Notes
+```text
+DVMD_DB_HOST=127.0.0.1
+DVMD_DB_PORT=3307
+DVMD_DB_USER=root
+DVMD_DB_PASSWORD=
+DVMD_DB_NAME=dvmd_db
+```
 
-The SQL dump currently defines these main tables:
+Forgot/reset password email uses PHPMailer. SMTP credentials should be set with environment variables instead of hardcoding them:
 
-- `tbl_users`
-- `tbl_villagers`
-- `tbl_districts`
-- `tbl_subdistricts`
-- `tbl_villages`
-- `tbl_incidents`
-- `tbl_sos`
-- `tbl_announcements`
-- `tbl_audit_log`
+```text
+DVMD_SMTP_USER=
+DVMD_SMTP_PASSWORD=
+DVMD_SMTP_FROM_EMAIL=
+```
 
-The database models district, subdistrict, village, staff users, villagers, incidents, SOS alerts, and announcements.
+Use `.env.example` as a reference. The PHP built-in server does not automatically load `.env` files, so set environment variables in your terminal or system environment if you need to override the defaults.
 
-## Known Gaps To Review Before Deployment
+## Local URLs
 
-This repository should be treated as a working academic/project codebase, not a ready-to-deploy production package. Review these items first:
+Main pages:
 
-- `database/dvmd_db.sql` does not fully match every PHP script. Some API files reference fields such as `latitude`, `longitude`, `type`, `urgency_level`, `image`, `failed_attempts`, and `lock_until` that must exist in the deployed database schema.
-- `export_incidents.php` queries `tbl_incident`, while the SQL dump defines `tbl_incidents`.
-- Secrets are hard-coded in source files. Move database and SMTP credentials into environment-based configuration before production use.
-- `dvmd/api/` currently allows `Access-Control-Allow-Origin: *`, which is too open for most production deployments.
-- The repository includes vendored PHPMailer code under `vendor/`, but there is no root-level Composer workflow documented in this project.
+```text
+http://127.0.0.1:8001/backend/loginpage.php
+http://127.0.0.1:8001/backend/registerpage.php
+http://127.0.0.1:8001/backend/forgotpasswordpage.php
+```
 
-## Suggested First Improvements
+Static assets:
 
-If you are continuing development, these are the highest-value cleanup tasks:
+```text
+http://127.0.0.1:8001/frontend/css/style.css
+http://127.0.0.1:8001/frontend/js/reports.js
+http://127.0.0.1:8001/frontend/images/background.png
+```
 
-1. Centralise database and SMTP configuration in one non-committed config file.
-2. Reconcile the SQL dump with the current incident, SOS, and villager API code.
-3. Add a root `composer.json` if dependency management is expected.
-4. Add a proper `.env` example and setup guide.
-5. Document API request parameters and sample responses if a mobile app depends on this repository.
+Existing data endpoints:
 
-## License
+```text
+http://127.0.0.1:8001/backend/get_reports.php
+http://127.0.0.1:8001/backend/weather_api.php
+http://127.0.0.1:8001/backend/export_incidents.php
+```
 
-No license file is currently included in this repository. Add one if the project will be shared publicly.
+## Troubleshooting
+
+- If login works but reports/weather do not show, confirm PHP is running from the repository root with `-t .`.
+- If database connection fails, confirm Docker MySQL is running and port `3307` is not used by another MySQL service.
+- If Kubernetes login page cannot connect to MySQL, confirm the `dvmd-mysql` pod is `Running` and `k8s/configmap.yaml` has `DVMD_DB_HOST=dvmd-mysql`.
+- If `http://localhost:30081` does not load, run `kubectl port-forward -n dvmd svc/dvmd-web 30081:80` and keep that terminal open during the demo.
+- If the dashboard shows old data after changing `database/dvmd_db.sql`, reset the Docker volume with `docker compose down -v`.
+- If forgot/reset password email fails, check the `DVMD_SMTP_*` environment variables.
+
+## CI/CD Pipeline
+
+GitHub Actions is split into two workflows:
+
+```text
+.github/workflows/ci.yml  automatic CI
+.github/workflows/cd.yml  manual CD
+```
+
+CI runs on push and pull request:
+
+```text
+Composer install
+PHP lint
+PHPUnit smoke tests
+Docker build
+Snyk dependency/container/IaC scans when SNYK_TOKEN is configured
+Push Docker image to GHCR when not running on a pull request
+```
+
+The Docker image is published to:
+
+```text
+ghcr.io/shiebin-bit/dvmd-emergency-module
+```
+
+CD is manual. In GitHub Actions, open the `CD` workflow and click `Run workflow`. The deploy job:
+
+```text
+Runs Terraform
+Creates/updates one Google Compute Engine VM
+Installs k3s on the VM
+Copies k8s manifests to the VM
+Applies the manifests with k3s kubectl
+Updates dvmd-web to the GHCR image for the current commit
+```
+
+When manually running CD, `image_tag` is optional. Leave it empty to deploy the current workflow commit SHA, or enter a GHCR tag such as `latest`.
+
+### GitHub Variables
+
+Add these under GitHub `Settings > Secrets and variables > Actions > Variables`:
+
+```text
+GCP_PROJECT_ID
+TF_STATE_BUCKET
+```
+
+| Variable | Example | Used by | Purpose |
+| --- | --- | --- | --- |
+| `GCP_PROJECT_ID` | `my-gcp-project-id` | CD | Google Cloud project where Terraform creates the k3s VM. |
+| `TF_STATE_BUCKET` | `my-dvmd-terraform-state` | CD | GCS bucket used by Terraform remote state. Create it once before the first CD run. |
+
+### GitHub Secrets
+
+Add these under GitHub `Settings > Secrets and variables > Actions > Secrets`:
+
+```text
+SNYK_TOKEN
+GCP_SA_KEY
+GCE_SSH_PRIVATE_KEY
+GCE_SSH_PUBLIC_KEY
+```
+
+| Secret | Required | Used by | Purpose |
+| --- | --- | --- | --- |
+| `SNYK_TOKEN` | Recommended | CI | Runs Snyk dependency, container, and IaC scans. If missing, CI skips Snyk. |
+| `GCP_SA_KEY` | Yes for CD | CD | Google service account JSON for Terraform. |
+| `GCE_SSH_PRIVATE_KEY` | Yes for CD | CD | Private SSH key used by GitHub Actions to connect to the k3s VM. |
+| `GCE_SSH_PUBLIC_KEY` | Yes for CD | CD/Terraform | Public SSH key injected into the GCE VM metadata. |
+| `GHCR_READ_TOKEN` | Only if GHCR image is private | CD/k3s | GitHub PAT with `read:packages` so k3s can pull a private GHCR image. |
+
+For `GCP_SA_KEY`, create a Google Cloud service account with enough permission to manage Compute Engine, firewall rules, and the Terraform state bucket, then paste the full JSON key as the secret value.
+
+For the SSH keys, generate a pair and put the public key in `GCE_SSH_PUBLIC_KEY`, private key in `GCE_SSH_PRIVATE_KEY`.
+
+Optional secret if the GHCR package is private:
+
+```text
+GHCR_READ_TOKEN
+```
+
+For the simplest demo, set the GHCR package visibility to public so the k3s VM can pull the image without `GHCR_READ_TOKEN`.
+
+## Terraform
+
+Terraform files are in `terraform/`. The configuration creates:
+
+```text
+1 Google Compute Engine VM
+Firewall rule for SSH 22
+Firewall rule for app NodePort 30081
+k3s installed through startup script
+```
+
+Default location:
+
+```text
+Region: asia-southeast1
+Zone: asia-southeast1-a
+Machine: e2-medium
+```
+
+After a successful manual CD run, open:
+
+```text
+http://<GCP_VM_EXTERNAL_IP>:30081/backend/loginpage.php
+```
+
+## Notes
+
+- The original dashboard layout, CSS, and PHP behavior are intentionally preserved.
+- This is a conservative folder split, not a full API/frontend rewrite.
+- The old cPanel database settings were removed from the active connection path; local development points to Docker MySQL by default.

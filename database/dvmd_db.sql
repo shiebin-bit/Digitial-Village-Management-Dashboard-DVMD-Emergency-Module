@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Dec 31, 2025 at 04:53 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- Host: localhost:3306
+-- Generation Time: May 11, 2026 at 03:17 PM
+-- Server version: 10.3.39-MariaDB-log-cll-lve
+-- PHP Version: 8.1.34
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,9 @@ SET time_zone = "+00:00";
 --
 -- Database: `dvmd_db`
 --
+
+CREATE DATABASE IF NOT EXISTS `dvmd_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `dvmd_db`;
 
 -- --------------------------------------------------------
 
@@ -41,41 +44,21 @@ CREATE TABLE `tbl_announcements` (
 --
 
 INSERT INTO `tbl_announcements` (`id`, `title`, `message`, `type`, `village_id`, `created_at`) VALUES
-(1, 'Flood Warning Issued', 'Heavy rainfall has been recorded in surrounding areas. Residents are advised to stay alert and prepare for possible evacuation.', 'Emergency', NULL, '2025-12-30 00:08:15'),
-(2, 'Strong Winds Expected', 'Weather forecast indicates strong winds and thunderstorms later this evening. Secure loose objects around your home.', 'Weather', NULL, '2025-12-30 00:08:15'),
-(3, 'Village Clean-Up Campaign', 'A village clean-up campaign will be held this Saturday at 8:00 AM. All residents are encouraged to participate.', 'Event', NULL, '2025-12-30 00:08:15'),
-(4, 'Temporary Water Supply Interruption', 'Water supply will be temporarily interrupted tomorrow from 10:00 AM to 4:00 PM due to maintenance works.', 'Info', NULL, '2025-12-30 00:08:15'),
-(5, 'Heat Advisory Notice', 'High temperatures are expected over the next few days. Please stay hydrated and avoid outdoor activities during peak hours.', 'Weather', NULL, '2025-12-30 00:08:15'),
-(6, 'Emergency Response Drill', 'An emergency response drill will be conducted this Friday at the community hall. This is for preparedness purposes.', 'Event', NULL, '2025-12-30 00:08:15'),
-(8, 'test', 'test', 'emergency', NULL, '2025-12-30 15:41:46'),
-(9, 'test', 'test', 'emergency', NULL, '2025-12-30 15:41:54'),
-(10, 'test', 'test', 'emergency', NULL, '2025-12-30 15:42:10'),
-(11, 'test', 'test', 'emergency', NULL, '2025-12-30 15:42:27'),
-(12, 'test', 'test', 'emergency', NULL, '2025-12-30 15:42:45'),
-(13, 'test', 'test', 'emergency', NULL, '2025-12-30 15:42:56'),
-(14, 'test', 'test', 'emergency', NULL, '2025-12-30 15:43:00'),
-(15, 'test', 'test', 'emergency', NULL, '2025-12-30 15:43:02'),
-(16, 'test', 'test', 'emergency', NULL, '2025-12-30 15:43:05'),
-(17, 'test', 'test', 'emergency', NULL, '2025-12-31 00:03:35'),
-(18, 'test', 'test', 'emergency', NULL, '2025-12-31 00:04:13'),
-(19, 'test', 'test', 'emergency', NULL, '2025-12-31 00:05:10'),
-(20, 'test', 'test', 'emergency', NULL, '2025-12-31 00:05:12'),
-(21, 'test', 'test', 'emergency', NULL, '2025-12-31 00:05:13'),
-(22, 'test', 'test', 'weather', NULL, '2025-12-31 10:11:26');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tbl_audit_log`
---
-
-CREATE TABLE `tbl_audit_log` (
-  `id` int(11) NOT NULL,
-  `incident_id` int(11) DEFAULT NULL,
-  `action` varchar(50) DEFAULT NULL,
-  `performed_by` varchar(100) DEFAULT NULL,
-  `performed_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(24, 'Village Clean-Up Campaign', 'A village clean-up campaign will be held this Saturday at 8:00 AM. All residents are encouraged to participate.', 'Event', 1, '2026-01-02 09:20:15'),
+(25, 'Village Clean-Up Campaign', 'A village clean-up campaign will be held this Saturday at 8:00 AM. All residents are encouraged to participate.', 'Event', 3, '2026-01-02 09:20:15'),
+(26, 'Temporary Water Supply Interruption', 'Water supply will be temporarily interrupted tomorrow from 10:00 AM to 4:00 PM due to maintenance works.', 'Info', 1, '2026-01-03 19:57:16'),
+(27, 'Temporary Water Supply Interruption', 'Water supply will be temporarily interrupted tomorrow from 10:00 AM to 4:00 PM due to maintenance works.', 'Info', 3, '2026-01-03 19:57:16'),
+(28, 'Temporary Water Supply Interruption', 'Water supply will be temporarily interrupted tomorrow from 10:00 AM to 4:00 PM due to maintenance works.', 'Info', 201, '2026-01-03 19:57:16'),
+(29, 'Temporary Water Supply Interruption', 'Water supply will be temporarily interrupted tomorrow from 10:00 AM to 4:00 PM due to maintenance works.', 'Info', 202, '2026-01-03 19:57:16'),
+(30, 'Flood Warning Issued', 'Heavy rainfall has been recorded in surrounding areas. Residents are advised to stay alert and prepare for possible evacuation.', 'Emergency', 1, '2026-01-03 20:18:12'),
+(31, 'Flood Warning Issued', 'Heavy rainfall has been recorded in surrounding areas. Residents are advised to stay alert and prepare for possible evacuation.', 'Emergency', 3, '2026-01-03 20:18:12'),
+(32, 'Flood Warning Issued', 'Heavy rainfall has been recorded in surrounding areas. Residents are advised to stay alert and prepare for possible evacuation.', 'Emergency', 201, '2026-01-03 20:18:12'),
+(33, 'Flood Warning Issued', 'Heavy rainfall has been recorded in surrounding areas. Residents are advised to stay alert and prepare for possible evacuation.', 'Emergency', 202, '2026-01-03 20:18:12'),
+(34, 'Test', 'testing', 'Weather', 1, '2026-01-05 14:46:31'),
+(35, 'Test', 'testing', 'Weather', 3, '2026-01-05 14:46:31'),
+(36, 'Test', 'testing', 'Weather', 201, '2026-01-05 14:46:31'),
+(37, 'Test', 'testing', 'Weather', 202, '2026-01-05 14:46:31'),
+(38, '<script>alert(\'XSS\');</script>', '<script>alert(\'XSS\');</script>', 'Emergency', 3, '2026-01-05 14:55:50');
 
 -- --------------------------------------------------------
 
@@ -101,6 +84,28 @@ INSERT INTO `tbl_districts` (`id`, `name`, `latitude`, `longitude`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tbl_households`
+--
+
+CREATE TABLE `tbl_households` (
+  `id` int(11) NOT NULL,
+  `villager_id` int(11) NOT NULL,
+  `family_group` varchar(10) NOT NULL,
+  `family_member` int(11) NOT NULL,
+  `sara` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tbl_households`
+--
+
+INSERT INTO `tbl_households` (`id`, `villager_id`, `family_group`, `family_member`, `sara`) VALUES
+(5, 6, 'B40', 4, 'Approved'),
+(6, 3, 'M40', 2, 'Approved');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tbl_incidents`
 --
 
@@ -110,7 +115,8 @@ CREATE TABLE `tbl_incidents` (
   `village_id` int(11) DEFAULT NULL,
   `type` varchar(50) NOT NULL,
   `description` text NOT NULL,
-  `location` text NOT NULL,
+  `latitude` double NOT NULL,
+  `longitude` double NOT NULL,
   `image` text NOT NULL,
   `urgency_level` varchar(50) NOT NULL,
   `date_created` datetime NOT NULL DEFAULT current_timestamp(),
@@ -121,10 +127,11 @@ CREATE TABLE `tbl_incidents` (
 -- Dumping data for table `tbl_incidents`
 --
 
-INSERT INTO `tbl_incidents` (`id`, `villager_id`, `village_id`, `type`, `description`, `location`, `image`, `urgency_level`, `date_created`, `status`) VALUES
-(8, 1, 3, 'Landslide', 'g', 'g', 'incident_8.png', 'Pending', '2025-12-29 18:45:29', 'Submitted'),
-(9, 1, 3, 'Fire', 'g', 'g', 'incident_9.png', 'In Progress', '2025-12-29 20:00:18', 'Submitted'),
-(10, 1, 3, 'Medical Emergency', 'kk', 'jjjj', 'incident_10.png', 'Reject', '2025-12-29 22:22:53', 'Submitted');
+INSERT INTO `tbl_incidents` (`id`, `villager_id`, `village_id`, `type`, `description`, `latitude`, `longitude`, `image`, `urgency_level`, `date_created`, `status`) VALUES
+(11, 6, 3, 'Flood', 'This are got a little flood', 6.4606617, 100.5019317, 'incident_11.png', 'Low', '2026-01-03 15:13:34', 'Pending'),
+(12, 6, 3, 'Landslide', 'Rock falling here', 6.4606617, 100.5019317, 'incident_12.png', 'High', '2026-01-03 16:33:40', 'Pending'),
+(15, 6, 3, 'Fire', 'HELP ME', 6.4606617, 100.5019317, 'incident_15.png', 'Medium', '2026-01-05 12:36:24', 'Pending'),
+(16, 6, 3, 'Fire', 'fire', 6.4678667, 100.5075879, 'incident_16.png', 'Medium', '2026-01-05 14:19:19', 'Progressing');
 
 -- --------------------------------------------------------
 
@@ -135,7 +142,12 @@ INSERT INTO `tbl_incidents` (`id`, `villager_id`, `village_id`, `type`, `descrip
 CREATE TABLE `tbl_sos` (
   `id` int(11) NOT NULL,
   `villager_id` int(11) NOT NULL,
-  `village_id` int(11) NOT NULL,
+  `village_id` int(11) DEFAULT NULL,
+  `type` varchar(50) NOT NULL,
+  `latitude` double NOT NULL,
+  `longitude` double NOT NULL,
+  `image` text NOT NULL,
+  `urgency_level` varchar(50) NOT NULL,
   `status` varchar(50) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -144,8 +156,9 @@ CREATE TABLE `tbl_sos` (
 -- Dumping data for table `tbl_sos`
 --
 
-INSERT INTO `tbl_sos` (`id`, `villager_id`, `village_id`, `status`, `created_at`) VALUES
-(0, 1, 1, 'Submitted', '2025-12-29 23:33:05');
+INSERT INTO `tbl_sos` (`id`, `villager_id`, `village_id`, `type`, `latitude`, `longitude`, `image`, `urgency_level`, `status`, `created_at`) VALUES
+(2, 6, 3, 'Flood', 6.4606617, 100.5019317, 'sos_2.png', 'Critical', 'Pending', '2026-01-03 16:32:33'),
+(4, 6, 3, 'Fire', 6.4606617, 100.5019317, 'sos_4.png', 'Critical', 'Pending', '2026-01-05 12:39:12');
 
 -- --------------------------------------------------------
 
@@ -166,7 +179,8 @@ CREATE TABLE `tbl_subdistricts` (
 --
 
 INSERT INTO `tbl_subdistricts` (`id`, `name`, `latitude`, `longitude`, `district_id`) VALUES
-(1, 'Jitra', 6.26812, 100.42167, 1);
+(1, 'Jitra', 6.26812, 100.42167, 1),
+(22, 'Kepala Batas', 6.2045027, 100.4126769, 1);
 
 -- --------------------------------------------------------
 
@@ -188,7 +202,7 @@ CREATE TABLE `tbl_users` (
   `failed_attempts` int(11) DEFAULT 0,
   `lock_until` datetime DEFAULT NULL,
   `otp` varchar(255) DEFAULT NULL,
-  `expired_at` datetime DEFAULT current_timestamp()
+  `expired_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -196,10 +210,13 @@ CREATE TABLE `tbl_users` (
 --
 
 INSERT INTO `tbl_users` (`id`, `role`, `name`, `email`, `phone`, `village_id`, `subdistrict_id`, `district_id`, `password`, `regdate`, `failed_attempts`, `lock_until`, `otp`, `expired_at`) VALUES
-(8, '2', 'Tan Yee Kien', 'yeekientanpro@gmail.com', '0108300288', NULL, NULL, 1, '$2y$10$nctHrZZXbVb7d62xndPEUelWO8t6Y9eDwgWql5oqqd3uvguLMx7RS', '2025-12-22 19:43:46', 0, NULL, '', '0000-00-00 00:00:00'),
-(9, '0', 'Eric', 'eric@gmail.com', '0123456789', 3, NULL, NULL, '$2y$10$pYXfZzRpm10s7pBk7U0G7OdsaQQQ50uef42obWPZihGtdD7SuusZ.', '2025-12-28 14:32:40', 0, NULL, '', '2025-12-28 14:32:40'),
-(11, '1', 'Lim Jia Ching', 'lim@gmail.com', '0321456987', NULL, 1, NULL, '$2y$10$VDGPwCe/EWhg3eIARy9kFOnzYKziIVg9hqV4AzfIkj0Vea.3g6Hca', '2025-12-31 09:56:22', 0, NULL, NULL, '2025-12-31 09:56:22'),
-(12, '2', 'Wee Jun Jeang', 'wee@gmail.com', '0369852147', NULL, NULL, 2, '$2y$10$oDki.2VVqrIG9RVrLRXDqO2C/jYNpCH..WdnavNwE6MO2Ep74e.F2', '2025-12-31 09:59:22', 0, NULL, NULL, '2025-12-31 09:59:22');
+(8, '2', 'Tan Yee Kien', 'yeekientanpro@gmail.com', '0108300288', NULL, NULL, 1, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2025-12-22 19:43:46', 0, NULL, NULL, NULL),
+(9, '0', 'Eric', 'eric@gmail.com', '0123456789', 3, NULL, NULL, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2025-12-28 14:32:40', 0, NULL, NULL, NULL),
+(11, '1', 'Lim Jia Ching', 'lim@gmail.com', '0321456987', NULL, 1, NULL, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2025-12-31 09:56:22', 0, NULL, NULL, NULL),
+(12, '2', 'Wee Jun Jeang', 'wee@gmail.com', '0369852147', NULL, NULL, 2, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2025-12-31 09:59:22', 0, NULL, NULL, NULL),
+(15, '0', 'Lim Wei', 'wei@gmail.com', '0254136987', 201, NULL, NULL, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2026-01-03 19:33:58', 0, NULL, NULL, NULL),
+(16, '0', 'Lim Wok Zhou', 'zhou@gmail.com', '0254316987', 202, NULL, NULL, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2026-01-03 19:36:59', 0, NULL, NULL, NULL),
+(25, '1', 'Foo Yong Quan', 'foo@gmail.com', '0152364789', NULL, 22, NULL, '$2y$10$5a2gEMJS4sd.D8jZe5Mg2OkUDg49MEMeoqDh7dTAma5H7W/2O6VO6', '2026-01-03 19:50:29', 0, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -213,17 +230,21 @@ CREATE TABLE `tbl_villagers` (
   `email` varchar(100) NOT NULL,
   `phone` varchar(25) NOT NULL,
   `village_id` int(11) DEFAULT NULL,
+  `address` text NOT NULL,
   `password` text NOT NULL,
-  `regdate` datetime NOT NULL DEFAULT current_timestamp()
+  `regdate` datetime NOT NULL DEFAULT current_timestamp(),
+  `household_id` int(11) DEFAULT NULL,
+  `failed_attempts` int(11) DEFAULT NULL,
+  `lock_until` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tbl_villagers`
 --
 
-INSERT INTO `tbl_villagers` (`id`, `name`, `email`, `phone`, `village_id`, `password`, `regdate`) VALUES
-(1, 't', 't@gmail.com', '1', 1, '$2y$10$8HHVNHSM1LiUwIqSJGj72OsyhHNHODqnBrai2Avvhrc3XvpcXXueK', '2025-12-28 20:57:46'),
-(3, 'Bakkien', 'bakkien@gmail.com', '0108300289', 3, '$2y$10$fdCd6t9jNs/0OaZpYA5KcuB30H7GpEXnxRlgJGtQayZbmglIDJqgu', '2025-12-30 23:06:11');
+INSERT INTO `tbl_villagers` (`id`, `name`, `email`, `phone`, `village_id`, `address`, `password`, `regdate`, `household_id`, `failed_attempts`, `lock_until`) VALUES
+(3, 'Bakkien', 'bakkien@gmail.com', '0108300289', 201, '123, Taman Cermai, 06000 Jitra, Kedah', '$2y$10$fdCd6t9jNs/0OaZpYA5KcuB30H7GpEXnxRlgJGtQayZbmglIDJqgu', '2025-12-30 23:06:11', 6, 4, NULL),
+(6, 'Chow Chee Xiong', 'xiong@gmail.com', '0147852369', 3, '123, Taman Pasu, 06000, Jitra, Kedah', '$2y$10$CPNnwXe83yh5swIlFDY8COyEwcJ9PcgC7Hc/nyt8kOThe6HkaQOsm', '2026-01-02 06:01:48', 5, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -244,8 +265,10 @@ CREATE TABLE `tbl_villages` (
 --
 
 INSERT INTO `tbl_villages` (`id`, `village_name`, `latitude`, `longitude`, `subdistrict_id`) VALUES
-(1, 'Taman Desa', 3.10591, 101.68683, NULL),
-(3, 'Taman Pasu', 6.2762198, 100.4165733, 1);
+(1, 'Taman Bunga', 3.10591, 101.68683, 1),
+(3, 'Taman Pasu', 6.2762198, 100.4165733, 1),
+(201, 'Taman Cermai', 5.4138294, 100.4110432, 1),
+(202, 'Taman Desa Damai', 5.3621218, 100.4415693, 1);
 
 --
 -- Indexes for dumped tables
@@ -259,15 +282,15 @@ ALTER TABLE `tbl_announcements`
   ADD KEY `fk_announcements_village` (`village_id`);
 
 --
--- Indexes for table `tbl_audit_log`
---
-ALTER TABLE `tbl_audit_log`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `tbl_districts`
 --
 ALTER TABLE `tbl_districts`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `tbl_households`
+--
+ALTER TABLE `tbl_households`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -276,6 +299,13 @@ ALTER TABLE `tbl_districts`
 ALTER TABLE `tbl_incidents`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_incidents_village` (`village_id`);
+
+--
+-- Indexes for table `tbl_sos`
+--
+ALTER TABLE `tbl_sos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_sos_village` (`village_id`);
 
 --
 -- Indexes for table `tbl_subdistricts`
@@ -315,13 +345,7 @@ ALTER TABLE `tbl_villages`
 -- AUTO_INCREMENT for table `tbl_announcements`
 --
 ALTER TABLE `tbl_announcements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
-
---
--- AUTO_INCREMENT for table `tbl_audit_log`
---
-ALTER TABLE `tbl_audit_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `tbl_districts`
@@ -330,34 +354,46 @@ ALTER TABLE `tbl_districts`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `tbl_households`
+--
+ALTER TABLE `tbl_households`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT for table `tbl_incidents`
 --
 ALTER TABLE `tbl_incidents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `tbl_sos`
+--
+ALTER TABLE `tbl_sos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `tbl_subdistricts`
 --
 ALTER TABLE `tbl_subdistricts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `tbl_users`
 --
 ALTER TABLE `tbl_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `tbl_villagers`
 --
 ALTER TABLE `tbl_villagers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=201;
 
 --
 -- AUTO_INCREMENT for table `tbl_villages`
 --
 ALTER TABLE `tbl_villages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=203;
 
 --
 -- Constraints for dumped tables
@@ -374,6 +410,12 @@ ALTER TABLE `tbl_announcements`
 --
 ALTER TABLE `tbl_incidents`
   ADD CONSTRAINT `fk_incidents_village` FOREIGN KEY (`village_id`) REFERENCES `tbl_villages` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tbl_sos`
+--
+ALTER TABLE `tbl_sos`
+  ADD CONSTRAINT `fk_sos_village` FOREIGN KEY (`village_id`) REFERENCES `tbl_villages` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `tbl_subdistricts`
@@ -405,3 +447,4 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+

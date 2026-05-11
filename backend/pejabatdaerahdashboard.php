@@ -1,6 +1,6 @@
 <?php
-require_once('includes/auth_user.php');
-require_once('includes/dbconnect.php');
+require_once(__DIR__ . '/includes/auth_user.php');
+require_once(__DIR__ . '/includes/dbconnect.php');
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -95,10 +95,10 @@ if (isset($_POST['submit_announcement'])) {
     <meta charset="UTF-8">
     <title>Pejabat Daerah Dashboard</title>
 
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/pejabatdaerahdashboard.css">
+    <link rel="stylesheet" href="../frontend/css/style.css">
+    <link rel="stylesheet" href="../frontend/css/pejabatdaerahdashboard.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="images/icon.png">
+    <link rel="icon" type="image/png" href="../frontend/images/icon.png">
     <title>Pejabat Daerah Dashboard | Incidents</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -120,7 +120,7 @@ if (isset($_POST['submit_announcement'])) {
     </button>
     <div class="sidebar">
         <div class="logo">
-            <img src="images/icon.png" style="scale: 0.75;" alt="Logo" class="logo-img">
+            <img src="../frontend/images/icon.png" style="scale: 0.75;" alt="Logo" class="logo-img">
             <p>DVMD</p>
         </div>
 
@@ -173,7 +173,7 @@ if (isset($_POST['submit_announcement'])) {
             <div id="dashboard" data-area-type="<?= $_SESSION['role'] ?>" data-area-id="<?= $_SESSION['area_id'] ?>">
             </div>
 
-            <script type="text/javascript" src="js/weather.js"></script>
+            <script type="text/javascript" src="../frontend/js/weather.js"></script>
 
             <?php
             $stmt = $conn->prepare("
@@ -932,7 +932,7 @@ if (isset($_POST['submit_announcement'])) {
         <?php elseif ($page === 'map'): ?>
             <div class="page-header"><h1>District Map</h1><p>Visual overview of <?= htmlspecialchars($district_name) ?></p></div>
             <div id="map" style="height:500px; width:100%; border-radius:10px;"></div>
-            <script src="js/reports.js"></script>
+            <script src="../frontend/js/reports.js"></script>
 
         <?php elseif ($page === 'analytics'): ?>
 
@@ -1117,8 +1117,9 @@ if (isset($_POST['submit_announcement'])) {
             </script>
         <?php endif; ?>
     </div>
-    <?php include_once('includes/footer.php'); ?>
-    <script type="text/javascript" src="js/sidebar.js"></script>
+    <?php include_once(__DIR__ . '/includes/footer.php'); ?>
+    <script type="text/javascript" src="../frontend/js/sidebar.js"></script>
 </body>
 
 </html>
+

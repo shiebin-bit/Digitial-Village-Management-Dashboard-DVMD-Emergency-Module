@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once('includes/dbconnect.php');
-require_once('includes/auth_user.php');
+require_once(__DIR__ . '/includes/dbconnect.php');
+require_once(__DIR__ . '/includes/auth_user.php');
 
 $role    = (int) $_SESSION['role'];
 $area_id = (int) $_SESSION['area_id'];
@@ -94,3 +94,5 @@ while ($row = $result->fetch_assoc()) {
 }
 
 echo json_encode($reports);
+
+
